@@ -58,9 +58,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ICprDirectPersonDataProvider.cs" />
-    <Compile Include="Queues\ExtractQueueItem.cs" />
-    <Compile Include="Queues\DbrBaseQueue.cs" />
     <Compile Include="Extract\ExtractPersonStaging.cs" />
     <Compile Include="Extract\ExtrcatConversion.cs" />
     <Compile Include="Extract\PersonConversion.cs" />
