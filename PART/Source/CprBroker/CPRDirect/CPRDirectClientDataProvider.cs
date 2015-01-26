@@ -56,7 +56,7 @@ using CprBroker.Utilities;
 
 namespace CprBroker.Providers.CPRDirect
 {
-    public partial class CPRDirectClientDataProvider : IPartReadDataProvider, IPutSubscriptionDataProvider, IExternalDataProvider, IPerCallDataProvider, ICprDirectPersonDataProvider
+    public partial class CPRDirectClientDataProvider : IPartReadDataProvider, IPutSubscriptionDataProvider, IExternalDataProvider, IPerCallDataProvider
     {
         #region IPartReadDataProvider members
         
