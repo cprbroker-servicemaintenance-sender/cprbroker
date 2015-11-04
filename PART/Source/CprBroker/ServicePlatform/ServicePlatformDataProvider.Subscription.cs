@@ -22,8 +22,9 @@
  * Danish National IT and Telecom Agency
  *
  * Contributor(s):
+ * Beemen Beshara
  * Thomas Kristensen
- *
+ * 
  * The code is currently governed by IT- og Telestyrelsen / Danish National
  * IT and Telecom Agency
  *
@@ -55,6 +56,7 @@ namespace CprBroker.Providers.ServicePlatform
     {
 
         protected enum ReturnCodePNR { ADDED, REMOVED, ALREADY_EXISTED, NON_EXISTING_PNR };
+        protected enum ReturnCodeMunicipality { ADDED, REMOVED, ALREADY_EXISTED, NON_EXISTING_MUNICIPALITYCODE };
 
         public bool PutSubscription(PersonIdentifier personIdentifier)
         {
@@ -106,6 +108,58 @@ namespace CprBroker.Providers.ServicePlatform
                 }
             }
         }
+
+        public bool PutSubscription(MunicipalityIdentifier municipalityIdentifier)
+        {
+            var service = CreateService<CprSubscriptionService.CprSubscriptionWebServicePortType, CprSubscriptionService.CprSubscriptionWebServicePortTypeClient>(ServiceInfo.CPRSubscription);
+
+            using (var callContext = this.BeginCall("AddMunicipalitySubscription", municipalityIdentifier.MunicipalityCode))
+            {
+                try
+                {
+
+                    var request = new CprSubscriptionService.AddMunicipalityCodeSubscriptionType()
+                    {
+                        InvocationContext = GetInvocationContext<CprSubscriptionService.InvocationContextType>(ServiceInfo.CPRSubscription.UUID),
+                    };
+                    request.MunicipalityCode = municipalityIdentifier.MunicipalityCode;
+
+                    var resultWrp = service.AddMunicipalityCodeSubscription(request);
+                    if (resultWrp != null)
+                    {
+                        ReturnCodeMunicipality returnCode = (ReturnCodeMunicipality)Enum.Parse(typeof(ReturnCodeMunicipality), resultWrp.Result); //will throw an overflow exception in case of unknown value.
+                        switch (returnCode)
+                        {
+                            case ReturnCodeMunicipality.ADDED:
+                                //success
+                                break;
+                            case ReturnCodeMunicipality.ALREADY_EXISTED:
+                                //success
+                                break;
+                            case ReturnCodeMunicipality.NON_EXISTING_MUNICIPALITYCODE:
+                                throw new Exception(String.Format("Error placing subscription for municipality code <{0}>, service platform returns NON_EXISTING_MUNICIPALITYCODE.", municipalityIdentifier.MunicipalityCode));
+                            default:
+                                throw new Exception(String.Format("Error placing subscription for municipality code <{0}>, service platform returns unexpected code <{1}>.", municipalityIdentifier.MunicipalityCode, returnCode));
+                        }
+                        //Admin.LogSuccess(String.Format("Placed service platform subscription on municipality code [%s], returned value [%s] ",municipalityIdentifier.MunicipalityCode, returnCode)); //TODO: Remove this log line
+                        callContext.Succeed();
+                        return true;
+                    }
+                    else
+                    {
+                        throw new Exception(String.Format("Null value returned by service api call AddMunicipalityCodeSubscription, when trying to place subscription for MunicipalityCode: <{0}>", municipalityIdentifier.MunicipalityCode));
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Admin.LogException(ex);
+                    callContext.Fail();
+                    return false;
+                }
+            }
+        }
+
 
     }
 }
